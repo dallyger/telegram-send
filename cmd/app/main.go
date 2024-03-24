@@ -10,9 +10,7 @@ var (
 	messages []string
 
 	rootCmd = &cobra.Command {
-		Use: "tg user [user, ...]",
-		Aliases: []string{"telegram-send"},
-		Example: "tg @botfather /start",
+		Use: "tg -m <message>",
 		Long: "Send Telegram messages as a bot",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cfg, err := config.GetConfig()
