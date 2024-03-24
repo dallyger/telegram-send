@@ -62,6 +62,15 @@ func (c Config) GetChat(chatAlias string) (telegram.Receiver, error) {
 	return id, nil
 }
 
+func (c Config) SetBotAuth(token string, botAlias string) error {
+	if botAlias == "" {
+		botAlias = "default"
+	}
+
+	c.auth.Set(fmt.Sprintf("bot.%s", botAlias), token)
+	return c.auth.WriteConfig()
+}
+
 func auth() (*viper.Viper, error) {
 
 	// TODO: make internal once no component relies on it anymore.

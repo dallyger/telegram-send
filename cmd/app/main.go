@@ -1,6 +1,7 @@
 package main
 
 import (
+	"dallyger/telegram-send/cmd/app/auth"
 	"dallyger/telegram-send/internal/config"
 
 	"github.com/spf13/cobra"
@@ -39,6 +40,8 @@ var (
 
 func init() {
 	rootCmd.Flags().StringArrayVarP(&messages, "msg", "m", nil, "message to send to user(s)")
+
+	rootCmd.AddCommand(auth.AuthCmd)
 }
 
 func main() {
