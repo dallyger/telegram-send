@@ -71,6 +71,15 @@ func (c Config) SetBotAuth(token string, botAlias string) error {
 	return c.auth.WriteConfig()
 }
 
+func (c Config) SetChatAlias(id string, chatAlias string) error {
+	if chatAlias == "" {
+		chatAlias = "default"
+	}
+
+	c.auth.Set(fmt.Sprintf("chat.%s", chatAlias), id)
+	return c.auth.WriteConfig()
+}
+
 func auth() (*viper.Viper, error) {
 
 	// TODO: make internal once no component relies on it anymore.
