@@ -20,7 +20,7 @@ func GetConfig() (*Config, error) {
 		return config, nil
 	}
 
-	auth, err := Auth()
+	auth, err := auth()
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c Config) GetChat(chatAlias string) (telegram.Receiver, error) {
 	return id, nil
 }
 
-func Auth() (*viper.Viper, error) {
+func auth() (*viper.Viper, error) {
 
 	// TODO: make internal once no component relies on it anymore.
 
