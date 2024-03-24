@@ -14,16 +14,28 @@ type Bot struct {
 
 type Receiver string
 
-func (b Bot) me () {
+func (b Bot) MeRaw () (string, error) {
 	resp, err := http.Get(fmt.Sprintf("https://api.telegram.org/bot%s/getMe", b.Id))
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
-	fmt.Printf("%s\n", body)
+	return string(body), err
+}
+
+func (b Bot) GetUpdatesRaw () (string, error) {
+	resp, err := http.Get(fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates", b.Id))
+
+	if err != nil {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	return string(body), err
 }
 
 func (b Bot) SendMessage(r Receiver, msg string) {
