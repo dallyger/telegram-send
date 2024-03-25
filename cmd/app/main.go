@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	files []string
 	messages []string
 
 	rootCmd = &cobra.Command {
@@ -31,6 +32,11 @@ var (
 				return err
 			}
 
+
+			for _, file := range files {
+				bot.SendDocument(chat, file)
+			}
+
 			for _, message := range messages {
 				bot.SendMessage(chat, message)
 			}
@@ -41,7 +47,8 @@ var (
 )
 
 func init() {
-	rootCmd.Flags().StringArrayVarP(&messages, "msg", "m", nil, "message to send to user(s)")
+	rootCmd.Flags().StringArrayVarP(&files, "file", "f", nil, "send file")
+	rootCmd.Flags().StringArrayVarP(&messages, "msg", "m", nil, "send message")
 
 	rootCmd.AddCommand(auth.AuthCmd)
 	rootCmd.AddCommand(chat.ChatCmd)
