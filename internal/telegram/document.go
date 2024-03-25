@@ -52,7 +52,7 @@ func (b Bot) SendDocument(chat Receiver, filePath string) error {
 	}
 
 	if resp.StatusCode != 200 {
-		return errors.New(fmt.Sprintf("[%d] %s\n", resp.StatusCode, string(body)))
+		return errors.New(string(body))
 	}
 
 	return nil

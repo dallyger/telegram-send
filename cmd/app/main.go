@@ -5,6 +5,8 @@ import (
 	"dallyger/telegram-send/cmd/app/chat"
 	"dallyger/telegram-send/cmd/app/check"
 	"dallyger/telegram-send/internal/config"
+	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -34,7 +36,10 @@ var (
 
 
 			for _, file := range files {
-				bot.SendDocument(chat, file)
+				if err := bot.SendDocument(chat, file); err != nil {
+					fmt.Fprintln(os.Stderr, err)
+					defer os.Exit(1)
+				}
 			}
 
 			for _, message := range messages {
