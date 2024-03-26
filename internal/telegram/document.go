@@ -11,7 +11,31 @@ import (
 	"path/filepath"
 )
 
+func (b Bot) SendAnimation(chat Receiver, filePath string) error {
+	return b.makeDocumentRequest("sendAnimation", chat, filePath, "animation")
+}
+
+func (b Bot) SendAudio(chat Receiver, filePath string) error {
+	return b.makeDocumentRequest("sendAudio", chat, filePath, "audio")
+}
+
 func (b Bot) SendDocument(chat Receiver, filePath string) error {
+	return b.makeDocumentRequest("sendDocument", chat, filePath, "document")
+}
+
+func (b Bot) SendPhoto(chat Receiver, filePath string) error {
+	return b.makeDocumentRequest("sendPhoto", chat, filePath, "photo")
+}
+
+func (b Bot) SendVideo(chat Receiver, filePath string) error {
+	return b.makeDocumentRequest("sendVideo", chat, filePath, "video")
+}
+
+func (b Bot) SendVoice(chat Receiver, filePath string) error {
+	return b.makeDocumentRequest("sendVoice", chat, filePath, "voice")
+}
+
+func (b Bot) makeDocumentRequest(tgAction string, chat Receiver, filePath string, fileProp string) error {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -26,13 +50,13 @@ func (b Bot) SendDocument(chat Receiver, filePath string) error {
 
 	// file part1
 	_, fileName := filepath.Split(filePath)
-	fw1, _ := bw.CreateFormFile("document", fileName)
+	fw1, _ := bw.CreateFormFile(fileProp, fileName)
 	io.Copy(fw1, file)
 
 	bw.Close()
 	file.Close()
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("https://api.telegram.org/bot%s/sendDocument", b.Id), buf)
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("https://api.telegram.org/bot%s/%s", b.Id, tgAction), buf)
 	if err != nil {
 		return err
 	}
