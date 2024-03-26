@@ -47,7 +47,7 @@ func init() {
 }
 
 func readToken() (string, error) {
-    bytes, err := term.ReadPassword(syscall.Stdin)
+    bytes, err := term.ReadPassword(int(syscall.Stdin))
     if err != nil {
         return "", errors.New(fmt.Sprintf("Failed to read token: %s", err))
     }
