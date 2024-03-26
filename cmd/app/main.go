@@ -94,7 +94,7 @@ var (
 func init() {
 	rootCmd.Flags().StringArrayVar(&animations, "animation", nil, "send animation")
 	rootCmd.Flags().StringArrayVarP(&audios, "audio", "a", nil, "send audio file")
-	rootCmd.Flags().StringArrayVarP(&audios, "photo", "p", nil, "send image")
+	rootCmd.Flags().StringArrayVarP(&photos, "photo", "p", nil, "send image")
 	rootCmd.Flags().StringArrayVar(&videos, "video", nil, "send video")
 	rootCmd.Flags().StringArrayVar(&voices, "voice", nil, "send .ogg audio file as a voice message")
 
