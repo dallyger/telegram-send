@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"dallyger/telegram-send/cmd/app/auth"
 	"dallyger/telegram-send/cmd/app/chat"
 	"dallyger/telegram-send/cmd/app/check"
 	"dallyger/telegram-send/internal/config"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -20,6 +22,7 @@ var (
 
 	files    []string
 	messages []string
+	stdin    bool
 
 	rootCmd = &cobra.Command{
 		Use:  "tg -m <message>",
@@ -86,6 +89,43 @@ var (
 				bot.SendMessage(chat, message)
 			}
 
+			if stdin {
+				reader := bufio.NewReader(os.Stdin)
+				buf := ""
+
+				for {
+					line, err := reader.ReadString('\n')
+					buf += line
+
+					if len(buf) > 1024*1024*8 {
+						// buffer grows too big (8 mb); send and flush it.
+						bot.SendMessageChunked(chat, buf)
+						buf = ""
+					}
+
+					if err == nil {
+						// continue reading
+						continue
+					}
+
+					if buf != "" {
+						// we've read it all. time to send.
+						bot.SendMessageChunked(chat, buf)
+						buf = ""
+					}
+
+					if err == io.EOF {
+						break
+					}
+
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err)
+						defer os.Exit(1)
+						break
+					}
+				}
+			}
+
 			return nil
 		},
 	}
@@ -100,6 +140,7 @@ func init() {
 
 	rootCmd.Flags().StringArrayVarP(&files, "file", "f", nil, "send file")
 	rootCmd.Flags().StringArrayVarP(&messages, "msg", "m", nil, "send message")
+	rootCmd.Flags().BoolVar(&stdin, "stdin", false, "send message by reading stdin")
 
 	rootCmd.AddCommand(auth.AuthCmd)
 	rootCmd.AddCommand(chat.ChatCmd)
