@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
@@ -87,6 +88,42 @@ func (b Bot) SendMessage(r Receiver, msg string) {
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	fmt.Printf("%s\n", body)
+}
+
+func (b Bot) SendStream(r Receiver, s *bufio.Reader) (error) {
+	buf := ""
+
+	for {
+		line, err := s.ReadString('\n')
+		buf += line
+
+		if len(buf) > 1024*1024*8 {
+			// buffer grows too big (8 mb); send and flush it.
+			b.SendMessageChunked(r, buf)
+			buf = ""
+		}
+
+		if err == nil {
+			// continue reading
+			continue
+		}
+
+		if buf != "" {
+			// we've read it all. time to send.
+			b.SendMessageChunked(r, buf)
+			buf = ""
+		}
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+	
+	return nil
 }
 
 // vim: noexpandtab
