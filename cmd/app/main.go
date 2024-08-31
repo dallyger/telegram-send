@@ -7,7 +7,7 @@ import (
 	"dallyger/telegram-send/cmd/app/check"
 	"dallyger/telegram-send/internal/config"
 	"fmt"
-	"io"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -28,6 +28,7 @@ var (
 		Use:  "tg -m <message>",
 		Long: "Send Telegram messages as a bot",
 		RunE: func(cmd *cobra.Command, args []string) error {
+
 			cfg, err := config.GetConfig()
 			if err != nil {
 				return err
@@ -43,86 +44,54 @@ var (
 				return err
 			}
 
-			for _, animation := range animations {
-				if err := bot.SendAnimation(chat, animation); err != nil {
+			args = os.Args[1:]
+			for {
+				if len(args) == 0 {
+					break
+				}
+
+				var err error
+				switch args[0] {
+
+				case "--animation":
+					err = bot.SendAnimation(chat, args[1])
+					args = args[2:]
+
+				case "-a", "--audio":
+					err = bot.SendAudio(chat, args[1])
+					args = args[2:]
+
+				case "-f", "--file":
+					err = bot.SendDocument(chat, args[1])
+					args = args[2:]
+
+				case "-m", "--msg":
+					bot.SendMessage(chat, args[1])
+					args = args[2:]
+
+				case "-p", "--photo":
+					err = bot.SendPhoto(chat, args[1])
+					args = args[2:]
+
+				case "--stdin":
+					err = bot.SendStream(chat, bufio.NewReader(os.Stdin))
+					args = args[1:]
+
+				case "--video":
+					err = bot.SendVideo(chat, args[1])
+					args = args[2:]
+
+				case "--voice":
+					err = bot.SendVoice(chat, args[1])
+					args = args[2:]
+
+				default:
+					log.Fatalf("Invalid arg: %+v\n", args[0])
+				}
+
+				if err != nil {
 					fmt.Fprintln(os.Stderr, err)
 					defer os.Exit(1)
-				}
-			}
-
-			for _, audio := range audios {
-				if err := bot.SendAudio(chat, audio); err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					defer os.Exit(1)
-				}
-			}
-
-			for _, photo := range photos {
-				if err := bot.SendPhoto(chat, photo); err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					defer os.Exit(1)
-				}
-			}
-
-			for _, video := range videos {
-				if err := bot.SendVideo(chat, video); err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					defer os.Exit(1)
-				}
-			}
-
-			for _, voice := range voices {
-				if err := bot.SendVoice(chat, voice); err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					defer os.Exit(1)
-				}
-			}
-
-			for _, file := range files {
-				if err := bot.SendDocument(chat, file); err != nil {
-					fmt.Fprintln(os.Stderr, err)
-					defer os.Exit(1)
-				}
-			}
-
-			for _, message := range messages {
-				bot.SendMessage(chat, message)
-			}
-
-			if stdin {
-				reader := bufio.NewReader(os.Stdin)
-				buf := ""
-
-				for {
-					line, err := reader.ReadString('\n')
-					buf += line
-
-					if len(buf) > 1024*1024*8 {
-						// buffer grows too big (8 mb); send and flush it.
-						bot.SendMessageChunked(chat, buf)
-						buf = ""
-					}
-
-					if err == nil {
-						// continue reading
-						continue
-					}
-
-					if buf != "" {
-						// we've read it all. time to send.
-						bot.SendMessageChunked(chat, buf)
-						buf = ""
-					}
-
-					if err == io.EOF {
-						break
-					}
-
-					if err != nil {
-						fmt.Fprintln(os.Stderr, err)
-						defer os.Exit(1)
-						break
-					}
 				}
 			}
 
