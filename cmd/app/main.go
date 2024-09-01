@@ -29,6 +29,11 @@ var (
 		Long: "Send Telegram messages as a bot",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
+			if len(args) == 0 {
+				cmd.Help()
+				return nil
+			}
+
 			cfg, err := config.GetConfig()
 			if err != nil {
 				return err
