@@ -4,7 +4,10 @@ help:
 
 # Compile the project into a single binary.
 build:
-    go build -o ./bin/tg ./cmd/app/main.go
+    go build \
+    -o ./bin/tg \
+    -ldflags="-X 'main.version=$(git describe --tags --always)'" \
+    ./cmd/app/main.go
 
 # Install the binary for the current user.
 [unix]

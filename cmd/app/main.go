@@ -14,6 +14,8 @@ import (
 )
 
 var (
+	version = "dev-snapshot"
+
 	animations []string
 	audios     []string
 	photos     []string
@@ -27,6 +29,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:  "tg -m <message>",
 		Long: "Send Telegram messages as a bot",
+		Version: version,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			if len(args) == 0 {
