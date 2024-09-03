@@ -8,10 +8,49 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Location int
+
+const (
+	Any Location = iota
+	Local
+	User
+	System
+)
+
 var config *Config
 
 type Config struct {
 	auth *viper.Viper
+}
+
+func InitConfig(aloc Location) (*Config, error) {
+
+	a := viper.New()
+	a.SetConfigName("auth")
+	a.SetConfigType("toml")
+
+	switch aloc {
+	case Any:
+		a.AddConfigPath(".")
+		a.AddConfigPath("$HOME/.config/telegram-send")
+		a.AddConfigPath("/etc/telegram-send")
+	case Local:
+		a.AddConfigPath(".")
+	case User:
+		a.AddConfigPath("$HOME/.config/telegram-send")
+	case System:
+		a.AddConfigPath("/etc/telegram-send")
+	}
+
+	if werr := a.SafeWriteConfig(); werr != nil {
+		if _, ok := werr.(viper.ConfigFileAlreadyExistsError); ok {
+			// this is okay. we wan to create a file and it does exist.
+		} else {
+			return nil, werr
+		}
+	}
+
+	return GetConfig()
 }
 
 func GetConfig() (*Config, error) {
@@ -82,11 +121,9 @@ func (c Config) SetChatAlias(id string, chatAlias string) error {
 
 func auth() (*viper.Viper, error) {
 
-	// TODO: make internal once no component relies on it anymore.
-
 	v := viper.New()
 
-	v.SetConfigName("auth.toml")
+	v.SetConfigName("auth")
 	v.SetConfigType("toml")
 
 	// check in the current working directory

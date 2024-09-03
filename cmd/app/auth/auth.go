@@ -12,6 +12,7 @@ import (
 )
 
 var ask bool
+var local bool
 var token string
 
 var AuthCmd = &cobra.Command{
@@ -19,7 +20,12 @@ var AuthCmd = &cobra.Command{
     Long: "Authenticate as a bot",
     Short: "Authenticate as a bot",
     RunE: func(cmd *cobra.Command, args []string) error {
-        config, err := config.GetConfig()
+        aloc := config.User
+        if local {
+            aloc = config.Local
+        }
+
+        config, err := config.InitConfig(aloc)
         if err != nil {
             return err
         }
@@ -43,6 +49,7 @@ var AuthCmd = &cobra.Command{
 
 func init() {
     AuthCmd.Flags().BoolVarP(&ask, "ask", "a", false, "prompt for token")
+    AuthCmd.Flags().BoolVarP(&local, "local", "l", false, "store auth token in current directory")
     AuthCmd.Flags().StringVarP(&token, "token", "t", "", "token used to authenticate the bot")
 }
 
