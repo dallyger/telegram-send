@@ -4,6 +4,7 @@ import (
 	"dallyger/telegram-send/internal/telegram"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -37,6 +38,12 @@ func InitConfig(aloc Location) (*Config, error) {
 	case Local:
 		a.AddConfigPath(".")
 	case User:
+		dirname, err := os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+		dirname = fmt.Sprintf("%s/.config/telegram-send", dirname)
+		os.MkdirAll(dirname, os.ModePerm)
 		a.AddConfigPath("$HOME/.config/telegram-send")
 	case System:
 		a.AddConfigPath("/etc/telegram-send")
