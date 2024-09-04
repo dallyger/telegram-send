@@ -130,7 +130,7 @@ func auth() (*viper.Viper, error) {
 
 	v := viper.New()
 
-	v.SetConfigName("auth")
+	v.SetConfigName("auth.toml")
 	v.SetConfigType("toml")
 
 	// check in the current working directory
